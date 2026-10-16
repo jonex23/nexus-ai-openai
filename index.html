@@ -294,6 +294,7 @@ function startListen(){
   try{rec.start()}catch(x){want=false;fail('Não foi possível iniciar o microfone: '+x.message)}}
 function stopListen(){want=false;if(rec){try{rec.stop()}catch(e){}}listening=false;$('#mic').classList.remove('on');$('#interim').textContent='';if(!['blocked','unsupported'].includes(micState))setMic('ready');settled()}
 $('#mic').onclick=()=>want?stopListen():startListen();
+  console.log('NEXUS: botão do microfone configurado');
 
 /* ---------- Controles ---------- */
 function paint(){
