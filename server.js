@@ -9,9 +9,9 @@ try { // carregador mínimo de .env (uso local)
   }
 } catch {}
 
-const KEY = process.env.OPENAI_API_KEY || '';
-const MODEL = process.env.OPENAI_MODEL || '';
-const BASE = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
+const KEY = process.env.GROQ_API_KEY || '';
+const MODEL = process.env.GROQ_MODEL || process.env.OPENAI_MODEL || '';
+const BASE = (process.env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1').replace(/\/$/, '');
 const PORT = +process.env.PORT || 3000;
 const TRUST_PROXY = process.env.TRUST_PROXY === '1';
 const MAX_MSGS = 20, MAX_CHARS = 4000, MAX_BODY = 65536, RATE = 20, WINDOW = 60000;
@@ -60,10 +60,14 @@ async function chat(req, res) {
 
   let r;
   try {
-    r = await fetch(BASE + '/responses', {
+    r = await fetch(BASE + '/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + KEY },
-      body: JSON.stringify({ model: MODEL, instructions: SYSTEM, input, store: false, max_output_tokens: 900 }),
+     body: JSON.stringify({
+  model: MODEL,
+  messages: [{ role: 'system', content: SYSTEM }, ...input],
+  max_tokens: 900
+}),
       signal: AbortSignal.timeout(30000)
     });
   } catch (e) {
@@ -82,7 +86,7 @@ async function chat(req, res) {
     if (r.status === 400) return send(res, 502, { error: 'upstream_bad_request', message: 'A OpenAI rejeitou a requisição.' });
     return send(res, 502, { error: 'upstream_unavailable', message: 'A OpenAI está indisponível no momento. Tente novamente.' });
   }
-  const text = ((data && data.output) || []).flatMap(o => o.type === 'message' ? (o.content || []) : [])
+  const text = data?.choices?.[0]?.message?.content?.trim() || '';
     .filter(c => c.type === 'output_text').map(c => c.text).join('').trim();
   if (!text) return send(res, 502, { error: 'empty', message: 'A IA não retornou texto. Tente reformular.' });
   send(res, 200, { reply: text });
