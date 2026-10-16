@@ -1,0 +1,8 @@
+{
+  "name": "nexus-ai",
+  "version": "1.1.0",
+  "private": true,
+  "description": "NEXUS AI: interface futurista com backend seguro para a API Responses da OpenAI",
+  "scripts": { "start": "node server.js", "test": "node test/run.js" },
+  "engines": { "node": ">=18" }
+}

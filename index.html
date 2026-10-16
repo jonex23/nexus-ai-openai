@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NEXUS AI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap">
+<style>
+:root{--void:#02060d;--cyan:#38e8ff;--blue:#2f6bff;--ice:#eaf6ff;--red:#ff4d5e;--glass:rgba(10,32,64,.42);--line:rgba(56,232,255,.28);color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% 40%,#06152b 0%,var(--void) 70%);color:var(--ice);font:400 15px/1.45 'Exo 2',system-ui,'Segoe UI',Roboto,sans-serif}
+body[data-state=error]{--cyan:#ff4d5e}
+#bg{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.app{position:relative;z-index:1;display:grid;grid-template-rows:auto 1fr auto;min-height:100vh;gap:12px;padding:12px}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(10px);box-shadow:inset 0 0 24px rgba(56,232,255,.05)}
+body.perf .glass{backdrop-filter:none;background:rgba(6,20,40,.8)}
+body:not(.live) .app{opacity:0}
+.app{transition:opacity 1.2s}
+header.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:8px 14px}
+.brand{font-weight:700;letter-spacing:.18em;color:var(--cyan)}
+#clock{font-size:22px;font-weight:300;font-variant-numeric:tabular-nums;letter-spacing:.06em}
+#date{opacity:.7;text-transform:capitalize;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.chip{font-size:12px;padding:3px 10px;border:1px solid var(--line);border-radius:99px;background:rgba(0,0,0,.25)}
+.chip b{font-weight:400;opacity:.6;margin-right:5px}
+.chip.ok{border-color:#35e0a1}.chip.warn{border-color:#ffc24d}.chip.bad{border-color:var(--red)}
+main{display:grid;grid-template-columns:minmax(220px,280px) 1fr minmax(300px,380px);gap:12px;min-height:0}
+.panel{padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0}
+h2{margin:0;font-size:13px;font-weight:600;color:var(--cyan);letter-spacing:.08em}
+.apps{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.app-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;background:rgba(47,107,255,.08);border:1px solid var(--line);border-radius:8px;transition:transform .2s,border-color .2s,box-shadow .2s}
+.app-btn:hover{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 0 18px rgba(56,232,255,.3)}
+.app-btn svg{width:30px;height:30px;stroke:var(--cyan);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.app-btn span{font-size:12px}
+.core{align-items:center;justify-content:space-between;text-align:center}
+#slot{width:100%;flex:1;min-height:300px}
+#coreLabel{font-size:20px;font-weight:300;letter-spacing:.2em}
+#micText{font-size:13px;opacity:.8;min-height:20px}
+#interim{font-size:13px;opacity:.6;min-height:20px;font-style:italic}
+#mic{width:68px;height:68px;border-radius:50%;border:2px solid var(--cyan);background:rgba(56,232,255,.1);display:grid;place-items:center;transition:.2s}
+#mic svg{width:28px;height:28px;stroke:var(--cyan);fill:none;stroke-width:1.8;stroke-linecap:round}
+#mic.on{background:rgba(56,232,255,.35);box-shadow:0 0 0 6px rgba(56,232,255,.15),0 0 30px var(--cyan)}
+#hist{list-style:none;margin:0;padding:0;font-size:12px;opacity:.75;display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:center}
+#hist li::before{content:'›';color:var(--cyan);margin-right:4px}
+#log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:200px;padding-right:4px}
+.m{max-width:90%;padding:8px 12px;border-radius:8px;border:1px solid var(--line);word-wrap:break-word}
+.m small{display:block;font-size:10px;opacity:.55;margin-top:2px}
+.m.user{align-self:flex-end;background:rgba(47,107,255,.25)}
+.m.bot{align-self:flex-start;background:rgba(56,232,255,.08)}
+.m.sys{align-self:center;font-size:12px;opacity:.7;border-style:dashed}
+.m a{color:var(--cyan);display:inline-block;margin-top:4px}
+form.send{display:flex;gap:6px}
+#inp{flex:1;min-width:0;padding:10px 12px;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:8px}
+.btn{padding:9px 14px;background:rgba(56,232,255,.1);border:1px solid var(--cyan);border-radius:8px;transition:.2s}
+.btn:hover{background:rgba(56,232,255,.28)}
+.btn[aria-pressed=false]{opacity:.5;border-color:var(--line)}
+footer.quick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:10px}
+.note{font-size:11px;opacity:.55;text-align:center}
+dialog{background:#06142a;color:var(--ice);border:1px solid var(--cyan);border-radius:12px;max-width:min(520px,92vw);padding:20px}
+dialog::backdrop{background:rgba(0,0,0,.65)}
+dialog h3{margin:0 0 10px;color:var(--cyan)}
+dialog ul{padding-left:18px;margin:0 0 14px}
+dialog label{display:block;margin:10px 0}
+dialog select{background:#02060d;border:1px solid var(--line);padding:6px;border-radius:6px;margin-left:8px}
+.ovl{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:var(--void);text-align:center}
+.ovl[hidden]{display:none}
+#launch{background:rgba(2,6,13,.88)}
+#launch .ring{width:110px;height:110px;margin:0 auto 18px;border-radius:50%;border:2px dashed var(--cyan);border-top-color:transparent;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#boot .lines{position:absolute;inset:0;overflow:hidden}
+#boot .lines i{position:absolute;left:-100%;height:1px;width:100%;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+#boot.run .lines i{animation:sweep 1.6s ease-in forwards}
+@keyframes sweep{to{left:100%}}
+#boot .t{opacity:0;font-size:clamp(18px,4vw,30px);letter-spacing:.25em;color:var(--cyan);margin-bottom:22px;position:relative}
+#boot.run .t{animation:fadein .8s 1.3s forwards}
+@keyframes fadein{to{opacity:1}}
+#boot .acts{position:relative;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+@media(max-width:900px){main{grid-template-columns:1fr}.apps{grid-template-columns:repeat(3,1fr)}#slot{min-height:260px;flex:none}#log{max-height:320px}.chips{margin-left:0}}
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<div class="app">
+<header class="bar glass">
+  <span class="brand">NEXUS AI</span>
+  <span id="clock">--:--:--</span><span id="date"></span>
+  <div class="chips" aria-label="Estado do sistema">
+    <span class="chip"><b>Microfone</b><span id="chMic">Pronto</span></span>
+    <span class="chip" id="cNet"><b>Internet</b><span id="chNet"></span></span>
+    <span class="chip" id="cAI"><b>Serviço de IA</b><span id="chAI">Verificando…</span></span>
+    <span class="chip"><b>Sistema</b><span id="chSys">Em espera</span></span>
+  </div>
+</header>
+
+<main>
+  <aside class="panel glass" aria-label="Aplicativos">
+    <h2>Aplicativos</h2>
+    <div class="apps" id="apps"></div>
+    <p class="note">Os atalhos apenas abrem o site oficial em nova aba. O NEXUS não acessa contas nem controla a reprodução.</p>
+  </aside>
+
+  <section class="panel glass core" aria-label="Núcleo">
+    <div id="slot"></div>
+    <div id="coreLabel" aria-live="polite">EM ESPERA</div>
+    <div id="micText"></div>
+    <div id="interim"></div>
+    <button id="mic" aria-label="Iniciar ou interromper a captura de voz" title="Microfone"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button>
+    <ul id="hist" aria-label="Últimos comandos"></ul>
+  </section>
+
+  <aside class="panel glass" aria-label="Conversa com NEXUS">
+    <h2>Conversa</h2>
+    <div id="log" role="log" aria-live="polite"></div>
+    <form class="send" id="form"><input id="inp" autocomplete="off" placeholder="Digite um comando…" aria-label="Mensagem"><button class="btn" type="submit">Enviar</button></form>
+    <p class="note">Comandos locais rodam no navegador. Outras mensagens vão à IA (OpenAI) via backend. A conversa não é salva.</p>
+  </aside>
+</main>
+
+<footer class="quick glass">
+  <button class="btn" id="qSpeak" aria-pressed="true">Fala: ligada</button>
+  <button class="btn" id="qSfx" aria-pressed="true">Sons: ligados</button>
+  <button class="btn" id="qPerf" aria-pressed="false">Modo visual: normal</button>
+  <button class="btn" id="qCmd">Comandos</button>
+  <button class="btn" id="qClear">Limpar conversa</button>
+  <button class="btn" id="qInfo">Sobre o sistema</button>
+</footer>
+</div>
+
+<dialog id="dCmd"><h3>Comandos disponíveis</h3><ul id="cmdList"></ul><form method="dialog"><button class="btn">Fechar</button></form></dialog>
+<dialog id="dInfo"><h3>NEXUS AI</h3>
+<p>Central de comandos que roda no navegador. Comandos locais por regras de texto, voz via Web Speech API (pt-BR) e atalhos para sites oficiais.</p>
+<ul><li>Mensagens que não são comandos locais são enviadas ao backend, que consulta a API da OpenAI. A chave fica só no servidor. A IA só propõe ações; você confirma.</li><li>Pesquisas abrem o buscador em outra aba; o NEXUS não lê esse conteúdo.</li><li>Só as preferências visuais e sonoras ficam salvas neste navegador.</li></ul>
+<form method="dialog"><button class="btn">Fechar</button></form></dialog>
+<dialog id="dCfg"><h3>Configurações do NEXUS</h3>
+<label>Buscador<select id="selEng"><option value="google">Google</option><option value="ddg">DuckDuckGo</option><option value="bing">Bing</option></select></label>
+<p class="note">Salvo apenas neste navegador.</p>
+<form method="dialog"><button class="btn">Fechar</button></form></dialog>
+
+<div class="ovl" id="launch" hidden><div><div class="ring"></div><div style="letter-spacing:.2em;font-size:20px">Inicializando <span id="launchName"></span></div></div></div>
+
+<div class="ovl" id="boot"><div class="lines"></div>
+  <div><div class="t">NEXUS AI — SISTEMA ONLINE</div>
+  <div class="acts"><button class="btn" id="bStart">Iniciar NEXUS</button><button class="btn" id="bSkip" style="opacity:.7">Ignorar abertura</button></div>
+  <p class="note" style="position:relative;margin-top:14px">O microfone só é ativado quando você pedir.</p></div>
+</div>
+
+<script>
+const $=(s)=>document.querySelector(s);
+const P={speak:true,sfx:true,perf:false,engine:'google'};
+try{Object.assign(P,JSON.parse(localStorage.getItem('nexus.prefs')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('nexus.prefs',JSON.stringify(P))}catch(e){}};
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)P.perf=true;
+
+/* ---------- Estado ---------- */
+const STATES={idle:'EM ESPERA',listening:'ESCUTANDO',thinking:'PROCESSANDO',speaking:'FALANDO',error:'ERRO'};
+const MIC={ready:'Pronto para receber comandos',listening:'Escutando',interp:'Interpretando comando',exec:'Executando ação',speaking:'Falando',blocked:'Microfone bloqueado',unsupported:'Navegador incompatível',error:'Erro de reconhecimento'};
+let state='idle',micState='ready',speaking=false,want=false,listening=false,pasteMode=false,pending=false,aiOK=false;
+function setState(s){state=s;document.body.dataset.state=s;$('#coreLabel').textContent=STATES[s];$('#chSys').textContent=STATES[s][0]+STATES[s].slice(1).toLowerCase()}
+function setMic(m){micState=m;$('#micText').textContent=MIC[m];$('#chMic').textContent=MIC[m]}
+const settled=()=>{if(speaking)return;if(pending){setState('thinking');return}setState(listening?'listening':'idle');if(!['blocked','error','unsupported'].includes(micState))setMic(listening?'listening':'ready')};
+
+/* ---------- Sons (Web Audio) ---------- */
+let AC;
+function tone(seq){if(!P.sfx)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t0=AC.currentTime;seq.forEach(([f,d,o=0])=>{const os=AC.createOscillator(),g=AC.createGain();os.frequency.value=f;g.gain.setValueAtTime(0,t0+o);g.gain.linearRampToValueAtTime(.05,t0+o+.01);g.gain.exponentialRampToValueAtTime(.0001,t0+o+d);os.connect(g);g.connect(AC.destination);os.start(t0+o);os.stop(t0+o+d+.02)})}catch(e){}}
+const SFX={boot:[[330,.15],[495,.15,.12],[660,.3,.24]],mic:[[600,.1],[900,.12,.09]],ok:[[700,.1]],done:[[520,.1],[780,.16,.1]],err:[[220,.25],[160,.3,.15]]};
+
+/* ---------- Chat ---------- */
+function msg(role,text,tag){const d=document.createElement('div');d.className='m '+role;const s=document.createElement('span');s.textContent=text;d.append(s);if(tag){const b=document.createElement('small');b.textContent=tag;d.append(b)}$('#log').append(d);$('#log').scrollTop=1e9;return d}
+const note=(t)=>msg('sys',t);
+function reply(t,o={}){const d=msg('bot',t,o.tag||'comando local');if(o.url){const a=document.createElement('a');a.href=o.url;a.target='_blank';a.rel='noopener';a.textContent='Abrir manualmente';d.append(a)}if(o.say!==false)speak(t)}
+function fail(t,url){setState('error');tone(SFX.err);reply(t,{tag:'erro',url});setTimeout(()=>{if(state==='error')settled()},3500)}
+const hist=[];
+function pushHist(t){hist.unshift(t);hist.splice(6);$('#hist').replaceChildren(...hist.map(h=>{const li=document.createElement('li');li.textContent=h;return li}))}
+
+/* ---------- Fala ---------- */
+let warnedVoice=false;
+function speak(text){
+  if(!P.speak)return;
+  if(!('speechSynthesis' in window)){note('Síntese de voz indisponível neste navegador.');return}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang='pt-BR';
+  const vs=speechSynthesis.getVoices(),v=vs.find(x=>x.lang==='pt-BR')||vs.find(x=>x.lang.startsWith('pt'));
+  if(v)u.voice=v;else if(!warnedVoice){warnedVoice=true;note('Nenhuma voz em português encontrada. Usando a voz padrão do dispositivo.')}
+  u.onstart=()=>{speaking=true;setState('speaking');if(listening)setMic('speaking')};
+  u.onend=u.onerror=()=>{speaking=false;if(state!=='error')settled();if(listening&&micState==='speaking')setMic('listening')};
+  speechSynthesis.speak(u)}
+function stopSpeaking(){if('speechSynthesis' in window)speechSynthesis.cancel();speaking=false;settled()}
+
+/* ---------- Aplicativos ---------- */
+const IC={yt:'<rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z"/>',nf:'<path d="M7 20V4l10 16V4"/>',pv:'<path d="M4 8l8 8 8-8"/><path d="M3 19c6 3 12 3 18 0"/>',mx:'<path d="M3 19V5l9 9 9-9v14"/>',sp:'<circle cx="12" cy="12" r="9"/><path d="M7 9.5c4-1 7-.5 10 1M7.5 12.5c3-.8 6-.4 8.5 1M8 15.3c2.5-.5 5-.3 7 .8"/>',gg:'<circle cx="11" cy="11" r="6"/><path d="M16 16l5 5"/>',gm:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',dr:'<path d="M9 4h6l6 10-3 6H6l-3-6z"/><path d="M9 4l6 10h6M3 14h12"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',cfg:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
+const APPS=[
+ {n:'YouTube',u:'https://www.youtube.com/',k:['youtube','you tube'],i:'yt'},
+ {n:'Netflix',u:'https://www.netflix.com/',k:['netflix'],i:'nf'},
+ {n:'Prime Video',u:'https://www.primevideo.com/',k:['prime video','amazon prime','prime'],i:'pv'},
+ {n:'HBO Max',u:'https://www.max.com/',k:['hbo max','hbo','max'],i:'mx'},
+ {n:'Spotify',u:'https://open.spotify.com/',k:['spotify'],i:'sp'},
+ {n:'Gmail',u:'https://mail.gmail.com/',k:['gmail','email','e mail'],i:'gm'},
+ {n:'Google Drive',u:'https://drive.google.com/',k:['google drive','drive'],i:'dr'},
+ {n:'Google Calendar',u:'https://calendar.google.com/',k:['google calendar','google agenda','calendario','agenda'],i:'cal'},
+ {n:'Google',u:'https://www.google.com/',k:['google'],i:'gg'},
+ {n:'Configurações',cfg:1,k:['configuracoes','configuracao','ajustes'],i:'cfg'}];
+APPS.find(a=>a.n==='Gmail').u='https://mail.google.com/';
+APPS.forEach(a=>{const b=document.createElement('button');b.className='app-btn';b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[a.i]+'</svg><span></span>';b.lastChild.textContent=a.n;b.onclick=()=>{pushHist('Abrir '+a.n);launch(a)};$('#apps').append(b)});
+const findApp=(q)=>APPS.find(a=>a.k.some(k=>(' '+q+' ').includes(' '+k+' ')));
+function tryOpen(url){let w=null;try{w=window.open(url,'_blank')}catch(e){}if(w){try{w.opener=null}catch(e){}return true}return false}
+function launch(app){
+  if(app.cfg){$('#dCfg').showModal();reply('Abrindo configurações do NEXUS.');return}
+  if(!navigator.onLine){fail('Sem conexão com a internet. Não é possível abrir '+app.n+'.');return}
+  $('#launchName').textContent=app.n;$('#launch').hidden=false;tone(SFX.ok);
+  reply('Inicializando '+app.n+'. Preparando abertura do serviço.');
+  setTimeout(()=>{$('#launch').hidden=true;
+    if(tryOpen(app.u)){reply(app.n+' aberto em nova aba.',{say:false});tone(SFX.done)}
+    else fail('O navegador bloqueou a abertura de '+app.n+'. Use o link abaixo.',app.u)},1600)}
+
+/* ---------- Pesquisa ---------- */
+const ENG={google:['Google','https://www.google.com/search?q='],ddg:['DuckDuckGo','https://duckduckgo.com/?q='],bing:['Bing','https://www.bing.com/search?q=']};
+function search(q){
+  if(!q){reply('Diga o que deseja pesquisar.');return}
+  if(!navigator.onLine){fail('Sem conexão com a internet. Não é possível pesquisar.');return}
+  const e=ENG[P.engine]||ENG.google,url=e[1]+encodeURIComponent(q);
+  reply('Iniciando pesquisa. Abrindo os resultados no navegador.');
+  if(tryOpen(url)){note('Resultados de “'+q+'” exibidos em '+e[0]+'. O NEXUS não analisa esse conteúdo.');tone(SFX.done)}
+  else fail('O navegador bloqueou a nova aba (comandos de voz não contam como clique). Use o link abaixo.',url)}
+
+/* ---------- Comandos ---------- */
+const CMDS=[
+ [/^(parar|pare|para|calar|cala) (de )?(falar|fala)|^silencio/,()=>{stopSpeaking();msg('bot','Fala interrompida.','comando local')},'“Parar de falar”'],
+ [/(parar|pare|para|desligar) (de )?(escutar|ouvir|escuta)/,()=>{stopListen();reply('Escuta encerrada.')},'“Parar de escutar”'],
+ [/^(ola|oi|e ai|bom dia|boa tarde|boa noite)\b|^$/,()=>reply('Sistema NEXUS ativo. Aguardando comandos.'),'“Olá, Nexus”'],
+ [/que horas|horas sao|hora atual/,()=>reply('Agora são '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'.'),'“Que horas são?”'],
+ [/que dia|data de hoje|qual e a data|data atual/,()=>reply('Hoje é '+new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'.'),'“Que dia é hoje?”'],
+ [/^(abrir|abre|abra|inicializar|inicializa|iniciar|ligar) (.+)/,(m)=>{const a=findApp(m[2]);a?launch(a):reply('Não conheço esse serviço. Disponíveis: '+APPS.map(x=>x.n).join(', ')+'.')},'“Abrir YouTube”, “Inicializar Netflix”, “Abrir Spotify”…'],
+ [/^(pesquisar|pesquise|pesquisa|buscar|busque|procurar)\b/,(m,raw)=>search(raw.replace(/^\s*(nexus[, ]*)?(pesquisar|pesquise|pesquisa|buscar|busque|procurar)\s+(sobre\s+|por\s+)?/i,'').replace(/[.!?]+$/,'').trim()),'“Pesquisar sobre a Amazônia brasileira”'],
+ [/(ler|leia|le) .*resultados/,()=>{pasteMode=true;$('#inp').placeholder='Cole o texto para ler em voz alta…';reply('Não consigo ler o conteúdo de outra aba: o navegador não permite. Copie o texto da página, cole no campo de mensagem e envie. Eu leio em voz alta.',{tag:'limitação'})},'“Ler os resultados em voz alta” (lê texto colado)'],
+ [/comandos/,()=>{$('#dCmd').showModal();reply('Exibindo comandos disponíveis.')},'“Mostrar comandos disponíveis”'],
+ [/tela inicial|pagina inicial|voltar ao inicio/,()=>{document.querySelectorAll('dialog[open]').forEach(d=>d.close());scrollTo(0,0);reply('Tela inicial.')},'“Voltar para a tela inicial”'],
+ [/(modo (normal|visual)|sair do modo de desempenho)/,()=>{setPerf(false);reply('Modo visual normal ativado.')},'“Modo visual normal”'],
+ [/modo (de )?desempenho/,()=>{setPerf(true);reply('Modo de desempenho ativado.')},'“Entrar em modo de desempenho”']];
+const norm=(s)=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+function handle(raw,src){
+  const text=raw.trim();if(!text)return;
+  msg('user',text,src==='voz'?'voz':null);pushHist(text);
+  if(pasteMode){pasteMode=false;$('#inp').placeholder='Digite um comando…';if(!P.speak){note('A fala está desligada. Ative “Fala” para ouvir o texto.');return}note('Lendo o texto fornecido.');speak(text.slice(0,3000));return}
+  setState('thinking');setMic('interp');tone(SFX.ok);
+  const n=norm(text).replace(/^nexus /,'').replace(/ nexus$/,'');
+  setTimeout(()=>{setMic('exec');
+    try{const c=CMDS.find(c=>c[0].test(n));
+      if(c)c[1](n.match(c[0]),text);
+      else askAI(text);
+    }catch(e){fail('Erro ao executar o comando: '+e.message)}
+    setTimeout(settled,450)},300)}
+
+/* ---------- Voz ---------- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null;
+function startListen(){
+  if(!SR){setMic('unsupported');fail('Este navegador não oferece reconhecimento de voz. Use o Google Chrome ou digite os comandos.');return}
+  if(want)return;
+  rec=new SR();rec.lang='pt-BR';rec.continuous=true;rec.interimResults=true;want=true;let first=true;
+  rec.onstart=()=>{listening=true;$('#mic').classList.add('on');if(first){first=false;tone(SFX.mic)}if(!speaking){setState('listening');setMic('listening')}};
+  rec.onresult=(e)=>{let it='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal){if(!speaking)handle(r[0].transcript,'voz')}else it+=r[0].transcript}$('#interim').textContent=it};
+  rec.onerror=(e)=>{const c=e.error;
+    if(c==='no-speech'||c==='aborted')return;
+    want=false;
+    if(c==='not-allowed'||c==='service-not-allowed'){fail('Permissão do microfone negada. Libere o microfone no ícone de cadeado da barra de endereço e tente de novo.');setMic('blocked')}
+    else if(c==='audio-capture'){fail('Nenhum microfone foi encontrado.');setMic('error')}
+    else if(c==='network'){fail('Falha de rede no reconhecimento de voz. O Chrome usa um serviço online para isso.');setMic('error')}
+    else{fail('Erro de reconhecimento de voz: '+c+'.');setMic('error')}};
+  rec.onend=()=>{if(want){try{rec.start()}catch(x){want=false}}
+    if(!want){listening=false;$('#mic').classList.remove('on');$('#interim').textContent='';settled()}};
+  try{rec.start()}catch(x){want=false;fail('Não foi possível iniciar o microfone: '+x.message)}}
+function stopListen(){want=false;if(rec){try{rec.stop()}catch(e){}}listening=false;$('#mic').classList.remove('on');$('#interim').textContent='';if(!['blocked','unsupported'].includes(micState))setMic('ready');settled()}
+$('#mic').onclick=()=>want?stopListen():startListen();
+
+/* ---------- Controles ---------- */
+function paint(){
+  document.body.classList.toggle('perf',P.perf);
+  const set=(id,on,a,b)=>{const e=$(id);e.setAttribute('aria-pressed',on);e.textContent=on?a:b};
+  set('#qSpeak',P.speak,'Fala: ligada','Fala: desligada');set('#qSfx',P.sfx,'Sons: ligados','Sons: desligados');
+  set('#qPerf',P.perf,'Modo visual: desempenho','Modo visual: normal');$('#qPerf').setAttribute('aria-pressed',!P.perf);
+  $('#selEng').value=P.engine;size()}
+function setPerf(v){P.perf=v;save();paint()}
+$('#qSpeak').onclick=()=>{P.speak=!P.speak;if(!P.speak)stopSpeaking();save();paint()};
+$('#qSfx').onclick=()=>{P.sfx=!P.sfx;save();paint();tone(SFX.ok)};
+$('#qPerf').onclick=()=>setPerf(!P.perf);
+$('#qCmd').onclick=()=>$('#dCmd').showModal();
+$('#qInfo').onclick=()=>$('#dInfo').showModal();
+$('#qClear').onclick=()=>{$('#log').replaceChildren();note('Conversa limpa.')};
+$('#selEng').onchange=(e)=>{P.engine=e.target.value;save()};
+$('#form').onsubmit=(e)=>{e.preventDefault();if(speaking)stopSpeaking();const v=$('#inp').value;$('#inp').value='';handle(v,'texto')};
+CMDS.forEach(c=>{const li=document.createElement('li');li.textContent=c[3]||c[2];$('#cmdList').append(li)});
+
+/* ---------- Relógio e rede ---------- */
+function tick(){const d=new Date();$('#clock').textContent=d.toLocaleTimeString('pt-BR');$('#date').textContent=d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+function net(){const on=navigator.onLine;$('#chNet').textContent=on?'Conectado':'Sem conexão';$('#cNet').className='chip '+(on?'ok':'bad')}
+setInterval(tick,1000);tick();net();addEventListener('online',net);addEventListener('offline',net);
+
+/* ---------- Núcleo holográfico (canvas) ---------- */
+const cv=$('#bg'),cx=cv.getContext('2d'),slot=$('#slot');let W=0,H=0,parts=[];
+function size(){const d=Math.min(devicePixelRatio||1,P.perf?1:2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);parts=Array.from({length:P.perf?25:110},()=>({x:Math.random()*W,y:Math.random()*H,v:.1+Math.random()*.4,s:.4+Math.random()*1.6}))}
+addEventListener('resize',size);
+let last=0;
+function frame(t){requestAnimationFrame(frame);if(document.hidden||(P.perf&&t-last<33))return;last=t;
+  cx.clearRect(0,0,W,H);
+  const err=state==='error',col=err?'255,77,94':'56,232,255',ac=err?'255,77,94':'47,107,255',s=t/1000;
+  cx.fillStyle='rgb('+col+')';
+  for(const p of parts){p.y-=p.v;if(p.y<0){p.y=H;p.x=Math.random()*W}cx.globalAlpha=.2+.45*Math.abs(Math.sin(s*.7+p.x));cx.fillRect(p.x,p.y,p.s,p.s)}
+  cx.globalAlpha=1;
+  const r=slot.getBoundingClientRect();if(r.bottom<0||r.top>H)return;
+  const x=r.left+r.width/2,y=r.top+r.height/2,R=Math.min(r.width,r.height)*.3;
+  const sp={idle:.25,listening:.7,thinking:2.6,speaking:.9,error:.1}[state];
+  const pulse=state==='listening'?1+.07*Math.sin(s*7):1+.02*Math.sin(s*2);
+  const g=cx.createRadialGradient(x,y,0,x,y,R*1.4);g.addColorStop(0,'rgba('+col+',.38)');g.addColorStop(1,'rgba('+col+',0)');
+  cx.fillStyle=g;cx.beginPath();cx.arc(x,y,R*1.4,0,7);cx.fill();
+  [[1,[60,14],1,.9,2],[1.2,[4,10],-1.4,.7,1.2],[1.4,[120,30,10,30],.7,.55,1.2],[.68,[20,8],-2,.9,1.2]].forEach(([k,d,dir,al,w],i)=>{
+    const a=s*sp*dir+i;cx.setLineDash(d);cx.strokeStyle='rgba('+(i%2?ac:col)+','+al+')';cx.lineWidth=w;
+    cx.beginPath();cx.arc(x,y,R*k*pulse,a,a+6.2832);cx.stroke()});
+  cx.setLineDash([]);
+  if(state==='thinking'){cx.strokeStyle='rgb('+col+')';cx.lineWidth=4;cx.beginPath();cx.arc(x,y,R*1.2,s*5,s*5+1.1);cx.stroke()}
+  if(state==='listening'){const f=(s*1.2)%1;cx.strokeStyle='rgba('+col+','+(1-f)+')';cx.lineWidth=2;cx.beginPath();cx.arc(x,y,R*(1+f*.9),0,7);cx.stroke()}
+  if(state==='speaking'){cx.strokeStyle='rgba('+col+',.9)';cx.lineWidth=2;for(let i=0;i<72;i++){const a=i/72*6.2832,l=R*.05+R*.28*Math.abs(Math.sin(i*.7+s*9)*Math.sin(i*.3+s*5));cx.beginPath();cx.moveTo(x+Math.cos(a)*R*1.55,y+Math.sin(a)*R*1.55);cx.lineTo(x+Math.cos(a)*(R*1.55+l),y+Math.sin(a)*(R*1.55+l));cx.stroke()}}
+  const c=cx.createRadialGradient(x,y,0,x,y,R*.5);c.addColorStop(0,'rgba(255,255,255,.95)');c.addColorStop(.4,'rgba('+col+',.7)');c.addColorStop(1,'rgba('+ac+',0)');
+  cx.fillStyle=c;cx.beginPath();cx.arc(x,y,R*.5*pulse,0,7);cx.fill();
+  cx.save();cx.beginPath();cx.arc(x,y,R*.62,0,7);cx.clip();cx.strokeStyle='rgba('+col+',.8)';cx.lineWidth=1;const sy=y+Math.sin(s*1.6)*R*.55;cx.beginPath();cx.moveTo(x-R,sy);cx.lineTo(x+R,sy);cx.stroke();cx.restore();
+}
+
+/* ---------- IA (OpenAI via backend) ---------- */
+const conv=[],ACT=/\[\[ACAO:(abrir|pesquisar):([^\]]{1,120})\]\]/,ACT_G=new RegExp(ACT.source,'g');
+const aiChip=(c,t)=>{$('#cAI').className='chip '+c;$('#chAI').textContent=t};
+async function checkAI(){try{const j=await(await fetch('/api/health',{cache:'no-store'})).json();aiOK=!!j.configured;aiChip(aiOK?'ok':'warn',aiOK?'Pronto':'Sem chave no servidor')}catch(e){aiOK=false;aiChip('bad','Backend indisponível')}}
+const plain=(t)=>t.replace(/```[\s\S]*?```/g,' trecho de código omitido. ').replace(/[*_`#>\[\]]/g,'');
+async function askAI(text){
+  if(pending){note('Aguarde a resposta anterior terminar.');return}
+  pending=true;setState('thinking');setMic('interp');
+  const wait=msg('sys','NEXUS está processando…');
+  conv.push({role:'user',content:text.slice(0,4000)});
+  while(conv.length>20)conv.shift();
+  while(conv.length&&conv[0].role!=='user')conv.shift();
+  const abort=(t)=>{conv.pop();wait.remove();pending=false;fail(t)};
+  try{
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:conv}),signal:AbortSignal.timeout(45000)});
+    let j=null;try{j=await r.json()}catch(e){}
+    if(!r.ok||!j||!j.reply){abort(j&&j.message?j.message:'O backend de IA não respondeu (status '+r.status+'). Ele está em execução?');checkAI();return}
+    conv.push({role:'assistant',content:j.reply});
+    wait.remove();pending=false;
+    const m=j.reply.match(ACT),clean=j.reply.replace(ACT_G,'').trim();
+    reply(clean,{tag:'IA · OpenAI',say:false});speak(plain(clean));settled();
+    if(m)proposeAction(m[1],m[2].trim());
+  }catch(e){abort(e.name==='TimeoutError'?'A IA demorou demais para responder.':'Não foi possível conectar ao backend de IA. Verifique a conexão e se o servidor está em execução.');checkAI()}}
+function proposeAction(kind,arg){
+  let label,run;
+  if(kind==='abrir'){const a=findApp(norm(arg));if(!a||a.cfg){note('A IA sugeriu abrir “'+arg+'”, mas esse serviço não está na lista permitida.');return}label='Abrir '+a.n;run=()=>launch(a)}
+  else{label='Pesquisar “'+arg+'”';run=()=>search(arg)}
+  const d=msg('sys','A IA sugere: '+label+'. Nada foi executado ainda.'),y=document.createElement('button'),n=document.createElement('button');
+  y.className=n.className='btn';y.textContent='Confirmar';n.textContent='Cancelar';
+  y.onclick=()=>{d.remove();pushHist(label);run()};n.onclick=()=>{d.remove();note('Ação cancelada.')};
+  d.append(document.createElement('br'),y,' ',n)}
+$('#inp').addEventListener('keydown',(e)=>{if(e.key==='Escape'&&speaking)stopSpeaking()});
+checkAI();addEventListener('online',checkAI);
+
+/* ---------- Inicialização ---------- */
+function goLive(speakIt){$('#boot').hidden=true;document.body.classList.add('live');setState('idle');setMic(SR?'ready':'unsupported');
+  if(!SR)note('Reconhecimento de voz indisponível neste navegador. Use o Chrome ou digite comandos.');
+  reply('Sistema NEXUS ativo. Aguardando comandos.',{say:speakIt});tone(SFX.done)}
+let bootT;
+$('#bStart').onclick=()=>{$('#bStart').disabled=true;$('#boot').classList.add('run');tone(SFX.boot);bootT=setTimeout(()=>goLive(true),3000)};
+$('#bSkip').onclick=()=>{clearTimeout(bootT);goLive(true)};
+for(let i=0;i<9;i++){const l=document.createElement('i');l.style.top=(8+i*11)+'%';l.style.animationDelay=(i*.12)+'s';$('#boot .lines').append(l)}
+if('speechSynthesis' in window)speechSynthesis.getVoices();
+setState('idle');setMic(SR?'ready':'unsupported');paint();requestAnimationFrame(frame);
+</script>
+</body>
+</html>
