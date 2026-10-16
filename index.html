@@ -378,5 +378,102 @@ for(let i=0;i<9;i++){const l=document.createElement('i');l.style.top=(8+i*11)+'%
 if('speechSynthesis' in window)speechSynthesis.getVoices();
 setState('idle');setMic(SR?'ready':'unsupported');paint();requestAnimationFrame(frame);
 </script>
+  <section id="nexus-search" style="padding:20px;margin:20px auto;max-width:700px;background:#101827;color:white;border:1px solid #29405c;border-radius:16px;font-family:Arial,sans-serif">
+  <h2>Pesquisa na internet</h2>
+  <form id="nexus-search-form">
+    <input id="nexus-search-q" placeholder="O que deseja pesquisar?" required
+      style="box-sizing:border-box;width:100%;padding:12px;margin-bottom:10px;border-radius:8px">
+    <button type="submit" style="padding:10px 16px;cursor:pointer">Pesquisar</button>
+  </form>
+  <p id="nexus-search-status" aria-live="polite"></p>
+  <div id="nexus-search-results"></div>
+  <div id="nexus-search-voice" hidden>
+    <p>Deseja que eu leia os resultados em voz alta?</p>
+    <button id="nexus-search-read" type="button">Sim, ler</button>
+    <button id="nexus-search-stop" type="button">Parar leitura</button>
+  </div>
+</section>
+
+<script>
+(() => {
+  const form = document.getElementById('nexus-search-form');
+  const query = document.getElementById('nexus-search-q');
+  const status = document.getElementById('nexus-search-status');
+  const results = document.getElementById('nexus-search-results');
+  const voice = document.getElementById('nexus-search-voice');
+  let spokenText = '';
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const q = query.value.trim();
+    if (!q) return;
+
+    status.textContent = 'Pesquisando...';
+    results.replaceChildren();
+    voice.hidden = true;
+    speechSynthesis.cancel();
+
+    try {
+      const response = await fetch('/api/search?q=' + encodeURIComponent(q));
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Falha na pesquisa.');
+
+      const items = data.results || [];
+      if (!items.length) {
+        status.textContent = 'Nenhum resultado foi encontrado. Tente outra pesquisa.';
+        return;
+      }
+
+      for (const item of items) {
+        const article = document.createElement('article');
+        article.style.cssText = 'padding:12px 0;border-bottom:1px solid #29405c';
+
+        const title = document.createElement('h3');
+        title.textContent = item.title || 'Resultado';
+        article.appendChild(title);
+
+        const snippet = document.createElement('p');
+        snippet.textContent = item.snippet || '';
+        article.appendChild(snippet);
+
+        if (item.url) {
+          const link = document.createElement('a');
+          link.href = item.url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'Abrir página';
+          article.appendChild(link);
+        }
+
+        results.appendChild(article);
+      }
+
+      spokenText = items.map((item, i) =>
+        `Resultado ${i + 1}. ${item.title || ''}. ${item.snippet || ''}`
+      ).join('. ');
+
+      status.textContent = `Encontrei ${items.length} resultado(s).`;
+      voice.hidden = false;
+    } catch (error) {
+      status.textContent = error.message || 'Não foi possível pesquisar.';
+    }
+  });
+
+  document.getElementById('nexus-search-read').addEventListener('click', () => {
+    if (!spokenText || !('speechSynthesis' in window)) {
+      status.textContent = 'A leitura em voz alta não está disponível neste navegador.';
+      return;
+    }
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(spokenText);
+    utterance.lang = 'pt-BR';
+    speechSynthesis.speak(utterance);
+  });
+
+  document.getElementById('nexus-search-stop').addEventListener('click', () => {
+    speechSynthesis.cancel();
+  });
+})();
+</script>
 </body>
 </html>
