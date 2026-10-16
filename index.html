@@ -264,9 +264,8 @@ if (/^(pesquise|pesquisar|pesquisa|busque|buscar|procure|procurar)\b/.test(n)) {
     pesquisarInternet(q);
     return;
   }
-}
 
-}
+
   setTimeout(()=>{setMic('exec');
     try{const c=CMDS.find(c=>c[0].test(n));
       if(c)c[1](n.match(c[0]),text);
