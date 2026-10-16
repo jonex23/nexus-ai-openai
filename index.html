@@ -273,19 +273,6 @@ function handle(raw,src){
 
 const n = norm(text).replace(/^nexus /, '').replace(/ nexus$/, '');
 
-if (/^(pesquise|pesquisar|pesquisa|busque|buscar|procure|procurar)\b/.test(n)) {
-  const q = n.replace(
-    /^(pesquise|pesquisar|pesquisa|busque|buscar|procure|procurar)\s*(na internet\s*)?(sobre\s*)?/,
-    ''
-  ).trim();
-
-  if (q && window.pesquisarInternet) {
-    window.pesquisarInternet(q);
-    setTimeout(settled, 500);
-    return;
-  }
-}
-
 setTimeout(() => {
   setMic('exec');
   try {
@@ -375,7 +362,7 @@ function frame(t){requestAnimationFrame(frame);if(document.hidden||(P.perf&&t-la
 }
 
 /* ---------- IA (OpenAI via backend) ---------- */
-const conv=[],ACT=/\[\[ACAO:(abrir|pesquisar):([^\]]{1,120})\]\]/,ACT_G=new RegExp(ACT.source,'g');
+const conv=[],ACT=/\[\[ACAO:(abrir):([^\]]{1,120})\]\]/,ACT_G=new RegExp(ACT.source,'g');
 const aiChip=(c,t)=>{$('#cAI').className='chip '+c;$('#chAI').textContent=t};
 async function checkAI(){try{const j=await(await fetch('/api/health',{cache:'no-store'})).json();aiOK=!!j.configured;aiChip(aiOK?'ok':'warn',aiOK?'Pronto':'Sem chave no servidor')}catch(e){aiOK=false;aiChip('bad','Backend indisponível')}}
 const plain=(t)=>t.replace(/```[\s\S]*?```/g,' trecho de código omitido. ').replace(/[*_`#>\[\]]/g,'');
@@ -419,21 +406,6 @@ for(let i=0;i<9;i++){const l=document.createElement('i');l.style.top=(8+i*11)+'%
 if('speechSynthesis' in window)speechSynthesis.getVoices();
 setState('idle');setMic(SR?'ready':'unsupported');paint();requestAnimationFrame(frame);
 </script>
-  <section id="nexus-search" style="padding:20px;margin:20px auto;max-width:700px;background:#101827;color:white;border:1px solid #29405c;border-radius:16px;font-family:Arial,sans-serif">
-  <h2>Pesquisa na internet</h2>
-  <form id="nexus-search-form">
-    <input id="nexus-search-q" placeholder="O que deseja pesquisar?" required
-      style="box-sizing:border-box;width:100%;padding:12px;margin-bottom:10px;border-radius:8px">
-    <button type="submit" style="padding:10px 16px;cursor:pointer">Pesquisar</button>
-  </form>
-  <p id="nexus-search-status" aria-live="polite"></p>
-  <div id="nexus-search-results"></div>
-  <div id="nexus-search-voice" hidden>
-    <p>Deseja que eu leia os resultados em voz alta?</p>
-    <button id="nexus-search-read" type="button">Sim, ler</button>
-    <button id="nexus-search-stop" type="button">Parar leitura</button>
-  </div>
-</section>
 
 <script>
 (() => {
