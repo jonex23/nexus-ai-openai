@@ -114,10 +114,48 @@ const server = http.createServer(async (req, res) => {
   if (!q.trim()) return send(res, 400, { error: 'Digite o que deseja pesquisar.' });
 
   try {
-    const response = await fetch(
-      'https://api.duckduckgo.com/?q=' + encodeURIComponent(q) + '&format=json&no_html=1'
-    );
-    const data = await response.json();
+  const response = await fetch(
+    'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(q),
+    {
+      headers: {
+        'User-Agent': 'Mozilla/5.0'
+      },
+      signal: AbortSignal.timeout(10000)
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Falha na pesquisa');
+  }
+
+  const html = await response.text();
+  const results = [];
+  const blocks = html.split('class="result ');
+
+  for (const block of blocks.slice(1)) {
+    const titleMatch = block.match(/class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/);
+    const snippetMatch = block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/(?:a|div)>/);
+
+    if (titleMatch) {
+      const clean = (s) => s.replace(/<[^>]*>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#x27;|&#39;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .trim();
+
+      results.push({
+        title: clean(titleMatch[2]),
+        snippet: snippetMatch ? clean(snippetMatch[1]) : '',
+        url: titleMatch[1]
+      });
+    }
+
+    if (results.length >= 8) break;
+  }
+
+  return send(res, 200, { results });
 
     const results = [];
     if (data.AbstractText) {
