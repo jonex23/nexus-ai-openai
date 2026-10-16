@@ -427,17 +427,25 @@ setState('idle');setMic(SR?'ready':'unsupported');paint();requestAnimationFrame(
   const results = document.getElementById('nexus-search-results');
   const voice = document.getElementById('nexus-search-voice');
   
-async function pesquisarInternet(q) {
+
+window.pesquisarInternet = function(q) {
   const queryInput = document.getElementById('nexus-search-q');
   const form = document.getElementById('nexus-search-form');
 
   if (!queryInput || !form) {
-    fail('Não encontrei o formulário de pesquisa.');
+    alert('Formulário de pesquisa não encontrado.');
     return;
   }
 
   queryInput.value = q;
   form.requestSubmit();
+
+  document.getElementById('nexus-search').scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+};
+
 }
   let spokenText = '';
 
