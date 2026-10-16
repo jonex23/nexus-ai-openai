@@ -271,6 +271,20 @@ function handle(raw,src){
   tone(SFX.ok);
 
   const n=norm(text).replace(/^nexus /,'').replace(/ nexus$/,'');
+  
+if (/^(pesquise|pesquisar|pesquisa|busque|buscar|procure|procurar)\b/.test(n)) {
+  const q = n.replace(
+    /^(pesquise|pesquisar|pesquisa|busque|buscar|procure|procurar)\s*(na internet\s*)?(sobre\s*)?/,
+    ''
+  ).trim();
+
+  if (q && window.pesquisarInternet) {
+    window.pesquisarInternet(q);
+    setTimeout(settled, 500);
+    return;
+  }
+}
+
 
   setTimeout(()=>{
     setMic('exec');
@@ -446,7 +460,6 @@ window.pesquisarInternet = function(q) {
   });
 };
 
-}
   let spokenText = '';
 
   form.addEventListener('submit', async (event) => {
