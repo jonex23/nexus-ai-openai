@@ -86,7 +86,7 @@ async function chat(req, res) {
     if (r.status === 400) return send(res, 502, { error: 'upstream_bad_request', message: 'A OpenAI rejeitou a requisição.' });
     return send(res, 502, { error: 'upstream_unavailable', message: 'A OpenAI está indisponível no momento. Tente novamente.' });
   }
-  const text = data?.choices?.[0]?.message?.content?.trim() || '';
+ const text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content ? data.choices[0].message.content.trim() : '';
     .filter(c => c.type === 'output_text').map(c => c.text).join('').trim();
   if (!text) return send(res, 502, { error: 'empty', message: 'A IA não retornou texto. Tente reformular.' });
   send(res, 200, { reply: text });
