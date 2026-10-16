@@ -428,15 +428,6 @@ async function pesquisarInternet(q) {
   queryInput.value = q;
   form.requestSubmit();
 }
-    form.requestSubmit();
-  } else {
-    const status = document.getElementById('nexus-search-status');
-    if (status) status.textContent = 'Não encontrei o formulário de pesquisa.';
-  }
-
-  reply('Pesquisando na internet sobre ' + q + '.');
-}
-
   let spokenText = '';
 
   form.addEventListener('submit', async (event) => {
