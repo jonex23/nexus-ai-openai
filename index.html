@@ -230,7 +230,15 @@ function search(q){
 const CMDS=[
  [/^(parar|pare|para|calar|cala) (de )?(falar|fala)|^silencio/,()=>{stopSpeaking();msg('bot','Fala interrompida.','comando local')},'“Parar de falar”'],
  [/(parar|pare|para|desligar) (de )?(escutar|ouvir|escuta)/,()=>{stopListen();reply('Escuta encerrada.')},'“Parar de escutar”'],
- [/^(ola|oi|e ai|bom dia|boa tarde|boa noite)\b|^$/,()=>reply('Sistema NEXUS ativo. Aguardando comandos.'),'“Olá, Nexus”'],
+ [
+/^(ola|oi|e ai|bom dia|boa tarde|boa noite)\b|^$/,
+async () => {
+  reply('Sistema NEXUS ativo.');
+  await new Promise(resolve => setTimeout(resolve, 2200));
+  reply('Olá, senhor João.');
+},
+'“Olá, Nexus”'],
+],
  [/que horas|horas sao|hora atual/,()=>reply('Agora são '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'.'),'“Que horas são?”'],
  [/que dia|data de hoje|qual e a data|data atual/,()=>reply('Hoje é '+new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'.'),'“Que dia é hoje?”'],
  [/^(abrir|abre|abra|inicializar|inicializa|iniciar|ligar) (.+)/,(m)=>{const a=findApp(m[2]);a?launch(a):reply('Não conheço esse serviço. Disponíveis: '+APPS.map(x=>x.n).join(', ')+'.')},'“Abrir YouTube”, “Inicializar Netflix”, “Abrir Spotify”…'],
