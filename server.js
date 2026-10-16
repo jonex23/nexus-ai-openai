@@ -109,6 +109,51 @@ const server = http.createServer(async (req, res) => {
     const url = req.url.split('?')[0];
     if (req.method === 'GET' && url === '/api/health') return send(res, 200, { configured: !!(KEY && MODEL) });
     if (req.method === 'POST' && url === '/api/chat') return await chat(req, res);
+    if (req.method === 'GET' && url === '/api/search') {
+  const q = new URL(req.url, 'http://localhost').searchParams.get('q') || '';
+  if (!q.trim()) return send(res, 400, { error: 'Digite o que deseja pesquisar.' });
+
+  try {
+    const response = await fetch(
+      'https://api.duckduckgo.com/?q=' + encodeURIComponent(q) + '&format=json&no_html=1'
+    );
+    const data = await response.json();
+
+    const results = [];
+    if (data.AbstractText) {
+      results.push({
+        title: data.Heading || q,
+        snippet: data.AbstractText,
+        url: data.AbstractURL || ''
+      });
+    }
+
+    for (const item of (data.RelatedTopics || [])) {
+      if (item.Text && item.FirstURL) {
+        results.push({
+          title: item.Text.split(' - ')[0],
+          snippet: item.Text,
+          url: item.FirstURL
+        });
+      }
+      if (item.Topics) {
+        for (const sub of item.Topics) {
+          if (sub.Text && sub.FirstURL) {
+            results.push({
+              title: sub.Text.split(' - ')[0],
+              snippet: sub.Text,
+              url: sub.FirstURL
+            });
+          }
+        }
+      }
+    }
+
+    return send(res, 200, { results: results.slice(0, 8) });
+  } catch {
+    return send(res, 502, { error: 'Não foi possível pesquisar agora.' });
+  }
+}
     if (req.method === 'GET' && (url === '/' || url === '/index.html')) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': CSP, 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' });
       return res.end(fs.readFileSync(path.join(__dirname, 'index.html')));
