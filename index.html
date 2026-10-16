@@ -248,11 +248,28 @@ async () => {
  [/modo (de )?desempenho/,()=>{setPerf(true);reply('Modo de desempenho ativado.')},'“Entrar em modo de desempenho”']];
 const norm=(s)=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
 function handle(raw,src){
-  const text=raw.trim();if(!text)return;
-  msg('user',text,src==='voz'?'voz':null);pushHist(text);
-  if(pasteMode){pasteMode=false;$('#inp').placeholder='Digite um comando…';if(!P.speak){note('A fala está desligada. Ative “Fala” para ouvir o texto.');return}note('Lendo o texto fornecido.');speak(text.slice(0,3000));return}
-  setState('thinking');setMic('interp');tone(SFX.ok);
- 
+  const text=raw.trim();
+  if(!text)return;
+
+  msg('user',text,src==='voz'?'voz':null);
+  pushHist(text);
+
+  if(pasteMode){
+    pasteMode=false;
+    $('#inp').placeholder='Digite um comando…';
+    if(!P.speak){
+      note('A fala está desligada. Ative “Fala” para ouvir o texto.');
+      return;
+    }
+    note('Lendo o texto fornecido.');
+    speak(text.slice(0,3000));
+    return;
+  }
+
+  setState('thinking');
+  setMic('interp');
+  tone(SFX.ok);
+
   const n=norm(text).replace(/^nexus /,'').replace(/ nexus$/,'');
 
   setTimeout(()=>{
