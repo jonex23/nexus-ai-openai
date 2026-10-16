@@ -96,7 +96,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && url === '/api/chat') return await chat(req, res);
     if (req.method === 'GET' && (url === '/' || url === '/index.html')) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': CSP, 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' });
-      return res.end(fs.readFileSync(path.join(__dirname, 'public', 'index.html')));
+      return res.end(fs.readFileSync(path.join(__dirname, 'index.html')));
     }
     send(res, 404, { error: 'not_found', message: 'Não encontrado.' });
   } catch (e) {
