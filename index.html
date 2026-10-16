@@ -252,27 +252,21 @@ function handle(raw,src){
   msg('user',text,src==='voz'?'voz':null);pushHist(text);
   if(pasteMode){pasteMode=false;$('#inp').placeholder='Digite um comando…';if(!P.speak){note('A fala está desligada. Ative “Fala” para ouvir o texto.');return}note('Lendo o texto fornecido.');speak(text.slice(0,3000));return}
   setState('thinking');setMic('interp');tone(SFX.ok);
+ 
   const n=norm(text).replace(/^nexus /,'').replace(/ nexus$/,'');
-  
-if (/^(pesquise|pesquisar|pesquisa|busque|buscar|procure|procurar)\b/.test(n)) {
-  const q = n.replace(
-    /^(pesquise|pesquisar|pesquisa|busque|buscar|procure|procurar)( na internet)?\s*/,
-    ''
-  ).trim();
 
-  if (q) {
-    pesquisarInternet(q);
-    return;
-  }
-
-
-  setTimeout(()=>{setMic('exec');
-    try{const c=CMDS.find(c=>c[0].test(n));
-      if(c)c[1](n.match(c[0]),text);
+  setTimeout(()=>{
+    setMic('exec');
+    try {
+      const c=CMDS.find(c=>c[0].test(n));
+      if(c) c[1](n.match(c[0]),text);
       else askAI(text);
-    }catch(e){fail('Erro ao executar o comando: '+e.message)}
-    setTimeout(settled,450)},300)}
-
+    } catch(e) {
+      fail('Erro ao executar o comando: '+e.message);
+    }
+    setTimeout(settled,450);
+  },300);
+}
 /* ---------- Voz ---------- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null;
 function startListen(){
