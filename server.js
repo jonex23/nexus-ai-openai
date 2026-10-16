@@ -157,37 +157,7 @@ const server = http.createServer(async (req, res) => {
 
   return send(res, 200, { results });
 
-    const results = [];
-    if (data.AbstractText) {
-      results.push({
-        title: data.Heading || q,
-        snippet: data.AbstractText,
-        url: data.AbstractURL || ''
-      });
-    }
-
-    for (const item of (data.RelatedTopics || [])) {
-      if (item.Text && item.FirstURL) {
-        results.push({
-          title: item.Text.split(' - ')[0],
-          snippet: item.Text,
-          url: item.FirstURL
-        });
-      }
-      if (item.Topics) {
-        for (const sub of item.Topics) {
-          if (sub.Text && sub.FirstURL) {
-            results.push({
-              title: sub.Text.split(' - ')[0],
-              snippet: sub.Text,
-              url: sub.FirstURL
-            });
-          }
-        }
-      }
-    }
-
-    return send(res, 200, { results: results.slice(0, 8) });
+   
   } catch {
     return send(res, 502, { error: 'Não foi possível pesquisar agora.' });
   }
