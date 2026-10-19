@@ -526,27 +526,21 @@ window.pesquisarInternet = function(q) {
   const form = document.getElementById('nexus-music-form');
   const input = document.getElementById('nexus-music-query');
   const status = document.getElementById('nexus-music-status');
-  const player = document.getElementById('nexus-music-player');
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    const query = input.value.trim();
 
+    const query = input.value.trim();
     if (!query) return;
 
-    status.textContent = 'Abrindo resultados para: ' + query;
-    player.innerHTML = '';
+    status.textContent = 'Abrindo o YouTube...';
 
-    const frame = document.createElement('iframe');
-    frame.width = '100%';
-    frame.height = '315';
-    frame.style.border = '0';
-    frame.allow = 'autoplay; encrypted-media; picture-in-picture';
-    frame.allowFullscreen = true;
-    frame.title = 'Resultados musicais do YouTube';
-    frame.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(query);
+    const url = 'https://www.youtube.com/results?search_query='
+      + encodeURIComponent(query);
 
-    player.appendChild(frame);
+    window.open(url, '_blank', 'noopener,noreferrer');
+
+    status.textContent = 'Pesquisa aberta no YouTube. Escolha uma música para tocar.';
   });
 })();
 </script>
