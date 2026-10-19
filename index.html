@@ -508,5 +508,49 @@ window.pesquisarInternet = function(q) {
   });
 })();
 </script>
+  
+<!-- NEXUS MUSIC PLAYER -->
+<section id="nexus-music" style="margin:20px auto;max-width:700px;padding:20px;background:#101827;color:white;border:1px solid #29405c;border-radius:16px;font-family:Arial,sans-serif">
+  <h2>🎵 NEXUS MUSIC</h2>
+  <form id="nexus-music-form">
+    <input id="nexus-music-query" placeholder="Digite uma música ou artista" required
+      style="box-sizing:border-box;width:100%;padding:12px;margin-bottom:10px;border-radius:8px">
+    <button type="submit" style="padding:10px 16px;cursor:pointer">Buscar música</button>
+  </form>
+  <p id="nexus-music-status">Pronto para tocar música.</p>
+  <div id="nexus-music-player"></div>
+</section>
+
+<script>
+(() => {
+  const form = document.getElementById('nexus-music-form');
+  const input = document.getElementById('nexus-music-query');
+  const status = document.getElementById('nexus-music-status');
+  const player = document.getElementById('nexus-music-player');
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const query = input.value.trim();
+
+    if (!query) return;
+
+    status.textContent = 'Abrindo resultados para: ' + query;
+    player.innerHTML = '';
+
+    const frame = document.createElement('iframe');
+    frame.width = '100%';
+    frame.height = '315';
+    frame.style.border = '0';
+    frame.allow = 'autoplay; encrypted-media; picture-in-picture';
+    frame.allowFullscreen = true;
+    frame.title = 'Resultados musicais do YouTube';
+    frame.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(query);
+
+    player.appendChild(frame);
+  });
+})();
+</script>
+<!-- FIM NEXUS MUSIC PLAYER -->
+
 </body>
 </html>
