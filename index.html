@@ -521,36 +521,92 @@ window.pesquisarInternet = function(q) {
   <div id="nexus-music-player"></div>
 </section>
 
+
 <script>
 (() => {
   const form = document.getElementById('nexus-music-form');
   const input = document.getElementById('nexus-music-query');
   const status = document.getElementById('nexus-music-status');
+  const player = document.getElementById('nexus-music-player');
 
-  if (!form || !input || !status) return;
+  if (!form || !input || !status || !player) return;
 
   form.onsubmit = function(event) {
     event.preventDefault();
-    event.stopPropagation();
 
     const query = input.value.trim();
-
     if (!query) {
-      status.textContent = 'Digite uma música ou artista.';
+      status.textContent = 'Digite o nome de uma música.';
       return false;
     }
 
-    status.textContent = 'Abrindo o YouTube...';
-
-    const url = 'https://www.youtube.com/results?search_query='
-      + encodeURIComponent(query);
-
-    window.open(url, '_blank');
+    status.textContent = 'Abra o YouTube e copie o link do vídeo desejado.';
+    window.open(
+      'https://www.youtube.com/results?search_query=' +
+      encodeURIComponent(query),
+      '_blank'
+    );
 
     return false;
   };
+
+  const section = document.getElementById('nexus-music');
+  if (!document.getElementById('nexus-music-url')) {
+    const urlInput = document.createElement('input');
+    urlInput.id = 'nexus-music-url';
+    urlInput.placeholder = 'Cole aqui o link do vídeo do YouTube';
+    urlInput.style.cssText =
+      'box-sizing:border-box;width:100%;padding:12px;margin:10px 0;border-radius:8px';
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = 'Tocar no NEXUS';
+    button.style.cssText = 'padding:10px 16px;cursor:pointer';
+
+    section.insertBefore(urlInput, status);
+    section.insertBefore(button, status);
+
+    button.onclick = function() {
+      let videoId = '';
+      try {
+        const url = new URL(urlInput.value.trim());
+        if (url.hostname === 'youtu.be') {
+          videoId = url.pathname.slice(1);
+        } else if (url.hostname.endsWith('youtube.com')) {
+          if (url.pathname === '/watch') {
+            videoId = url.searchParams.get('v') || '';
+          } else if (url.pathname.startsWith('/embed/')) {
+            videoId = url.pathname.split('/')[2] || '';
+          } else if (url.pathname.startsWith('/shorts/')) {
+            videoId = url.pathname.split('/')[2] || '';
+          }
+        }
+      } catch (e) {}
+
+      if (!/^[\w-]{11}$/.test(videoId)) {
+        status.textContent = 'Cole um link válido de vídeo do YouTube.';
+        return;
+      }
+
+      player.replaceChildren();
+
+      const frame = document.createElement('iframe');
+      frame.src = 'https://www.youtube.com/embed/' +
+        videoId + '?enablejsapi=1';
+      frame.width = '100%';
+      frame.height = '315';
+      frame.style.border = '0';
+      frame.allow = 'encrypted-media; picture-in-picture';
+      frame.allowFullscreen = true;
+      frame.title = 'NEXUS Music';
+
+      player.appendChild(frame);
+      status.textContent = 'Player carregado. Clique em reproduzir.';
+    };
+  }
 })();
 </script>
+
 <!-- FIM NEXUS MUSIC PLAYER -->
 
 </body>
