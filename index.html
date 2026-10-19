@@ -592,7 +592,8 @@ window.pesquisarInternet = function(q) {
 
       const frame = document.createElement('iframe');
       frame.src = 'https://www.youtube.com/embed/' +
-        videoId + '?enablejsapi=1';
+        videoId + '?enablejsapi=1&origin=' +
+        encodeURIComponent(window.location.origin);
       frame.width = '100%';
       frame.height = '315';
       frame.style.border = '0';
