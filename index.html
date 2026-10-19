@@ -245,7 +245,8 @@ async () => {
  [/comandos/,()=>{$('#dCmd').showModal();reply('Exibindo comandos disponíveis.')},'“Mostrar comandos disponíveis”'],
  [/tela inicial|pagina inicial|voltar ao inicio/,()=>{document.querySelectorAll('dialog[open]').forEach(d=>d.close());scrollTo(0,0);reply('Tela inicial.')},'“Voltar para a tela inicial”'],
  [/(modo (normal|visual)|sair do modo de desempenho)/,()=>{setPerf(false);reply('Modo visual normal ativado.')},'“Modo visual normal”'],
- [/modo (de )?desempenho/,()=>{setPerf(true);reply('Modo de desempenho ativado.')},'“Entrar em modo de desempenho”']];
+[/modo (de )?desempenho/,()=>{setPerf(true);reply('Modo de desempenho ativado.')},'“Entrar em modo de desempenho”'],
+[/e ai bebe|eai bebe|e ai baby|eai baby/i,()=>{reply('Abrindo Iron Man, do Black Sabbath.');window.open('https://www.youtube.com/results?search_query=Black+Sabbath+Iron+Man+official+audio','_blank')},'“Nexus, e aí, bebê”']];
 const norm=(s)=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
 function handle(raw,src){
   const text=raw.trim();
