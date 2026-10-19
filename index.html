@@ -522,62 +522,47 @@ window.pesquisarInternet = function(q) {
 </section>
 
 <script>
+
+<script>
 (() => {
   const form = document.getElementById('nexus-music-form');
   const input = document.getElementById('nexus-music-query');
   const status = document.getElementById('nexus-music-status');
   const player = document.getElementById('nexus-music-player');
-  const urlInput = document.getElementById('nexus-music-url');
+
+  if (!form || !input || !status || !player) {
+    console.error('NEXUS MUSIC: elementos não encontrados.');
+    return;
+  }
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
 
-    const url = urlInput.value.trim();
     const query = input.value.trim();
-    let videoId = '';
 
-    if (url) {
-      try {
-        const parsed = new URL(url);
-        if (parsed.hostname === 'youtu.be') {
-          videoId = parsed.pathname.slice(1);
-        } else if (
-          parsed.hostname.endsWith('youtube.com') &&
-          parsed.pathname === '/watch'
-        ) {
-          videoId = parsed.searchParams.get('v') || '';
-        } else if (
-          parsed.hostname.endsWith('youtube.com') &&
-          parsed.pathname.startsWith('/embed/')
-        ) {
-          videoId = parsed.pathname.split('/')[2] || '';
-        }
-      } catch (e) {}
-    }
-
-    if (!videoId) {
-      status.textContent =
-        'Cole um link válido de vídeo do YouTube no campo indicado.';
+    if (!query) {
+      status.textContent = 'Digite o nome de uma música ou artista.';
       return;
     }
 
-    player.replaceChildren();
+    status.textContent = 'Pesquisando no YouTube...';
 
-    const frame = document.createElement('iframe');
-    frame.width = '100%';
-    frame.height = '315';
-    frame.style.border = '0';
-    frame.allow = 'autoplay; encrypted-media; picture-in-picture';
-    frame.allowFullscreen = true;
-    frame.title = 'NEXUS Music';
-    frame.src =
-      'https://www.youtube-nocookie.com/embed/' +
-      encodeURIComponent(videoId);
+    const url =
+      'https://www.youtube.com/results?search_query=' +
+      encodeURIComponent(query);
 
-    player.appendChild(frame);
-    status.textContent = 'Vídeo carregado. Pressione reproduzir.';
+    const tab = window.open(url, '_blank');
+
+    if (tab) {
+      status.textContent = 'Resultados do YouTube abertos em outra aba.';
+    } else {
+      status.textContent =
+        'O navegador bloqueou a nova aba. Permita pop-ups para este site.';
+    }
   });
 })();
+</script>
+
 </script>
 <!-- FIM NEXUS MUSIC PLAYER -->
 
