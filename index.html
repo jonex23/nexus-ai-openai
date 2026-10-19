@@ -522,47 +522,34 @@ window.pesquisarInternet = function(q) {
 </section>
 
 <script>
-
-<script>
 (() => {
   const form = document.getElementById('nexus-music-form');
   const input = document.getElementById('nexus-music-query');
   const status = document.getElementById('nexus-music-status');
-  const player = document.getElementById('nexus-music-player');
 
-  if (!form || !input || !status || !player) {
-    console.error('NEXUS MUSIC: elementos não encontrados.');
-    return;
-  }
+  if (!form || !input || !status) return;
 
-  form.addEventListener('submit', (event) => {
+  form.onsubmit = function(event) {
     event.preventDefault();
+    event.stopPropagation();
 
     const query = input.value.trim();
 
     if (!query) {
-      status.textContent = 'Digite o nome de uma música ou artista.';
-      return;
+      status.textContent = 'Digite uma música ou artista.';
+      return false;
     }
 
-    status.textContent = 'Pesquisando no YouTube...';
+    status.textContent = 'Abrindo o YouTube...';
 
-    const url =
-      'https://www.youtube.com/results?search_query=' +
-      encodeURIComponent(query);
+    const url = 'https://www.youtube.com/results?search_query='
+      + encodeURIComponent(query);
 
-    const tab = window.open(url, '_blank');
+    window.open(url, '_blank');
 
-    if (tab) {
-      status.textContent = 'Resultados do YouTube abertos em outra aba.';
-    } else {
-      status.textContent =
-        'O navegador bloqueou a nova aba. Permita pop-ups para este site.';
-    }
-  });
+    return false;
+  };
 })();
-</script>
-
 </script>
 <!-- FIM NEXUS MUSIC PLAYER -->
 
